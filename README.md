@@ -1,4 +1,4 @@
-Experimental Bootloader
+# Bootloader
 
 A small experimental x86_64 bootloader written in Assembly.
 
