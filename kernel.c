@@ -13,8 +13,6 @@ void clear(void);
 
 void kernel_main(void){
     
-    //print("Este texto esta sendo imprimido pelo kernel em x86_64");
-    
     clear();
     print("Linha 1\n");
     print("Linha 2\n");
