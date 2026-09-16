@@ -3,7 +3,8 @@
 // SPDX-License-Identifier: MIT
 .code16
 .section .text
-.global _start                                                                    #include "kernel_size.inc"
+.global _start
+#include "kernel_size.inc"
 
 // Os enderecos sao escritos como AA:BB, que resulta em (AA * 16 + BB), onde BB se chama offset
 
@@ -26,7 +27,8 @@ _start:
 
     mov $0x02, %ah // AH eh usado para a BIOS saber qual operacao eh a desejada. Ler setores
     mov $0x01, %al // Ler 1 setor
-    mov $0x00, %ch // Cilindro 0                                                      mov $0x02, %cl // Setor 2 (contagem dos setores comeca em 1)
+    mov $0x00, %ch // Cilindro 0
+    mov $0x02, %cl // Setor 2 (contagem dos setores comeca em 1)
     mov $0x00, %dh // Head 0 (cabeca de leitura)
     // DL ja tem a unidade do disco no boot fornecido pela BIOS
     mov $0x8000, %bx // Poe os dados no offset 0x8000 da RAM
@@ -45,7 +47,8 @@ _start:
     // Assim o bit que foi ativado pela operacao or, foi o bit que habilita o A20
 
     // Fora do Real-Mode a cpu passa a usar descritores de segmentos armazenados na GDT
-    lgdt gdt_descriptor // Carrega a GDT                                          
+    lgdt gdt_descriptor // Carrega a GDT
+
     // Mesmo processo feito para habilitar o A20, porem para habilitar o Protection Enable (modo de 32 bits)
     mov %cr0, %eax
     or $0x1, %eax
@@ -60,9 +63,12 @@ disk_error:
     mov $0xB800, %ax
     mov %ax, %es
 
-    // Escreve um texto na memoria de textoVGA                                    
-    movb $'E', %es:0                                                                  movb $0x07, %es:1
-                                                                                      movb $'r', %es:2
+    // Escreve um texto na memoria de textoVGA
+
+    movb $'E', %es:0
+    movb $0x07, %es:1
+
+    movb $'r', %es:2
     movb $0x07, %es:3
 
     movb $'r', %es:4
@@ -71,12 +77,17 @@ disk_error:
     movb $'o', %es:6
     movb $0x07, %es:7
 
-    movb $'r', %es:8                                                                  movb $0x07, %es:9
-                                                                                  hlt                                                                                   jmp disk_error
-                                                                                  
+    movb $'r', %es:8
+    movb $0x07, %es:9
+                                                                                  hlt
+    jmp disk_error
+
+
 // Instrucoes que seram executados durante o Protected Mode (modo 32 bits)
-.code32                                                                           protected_mode:
-    // Iniciando a paginacao //                                                   
+.code32
+protected_mode:
+    // Iniciando a paginacao //
+
     mov $0x1000, %edi // Endereco onde comeca a paginacao
     xor %eax, %eax // Zera EAX
     mov $4096 / 4, %ecx // Escreve 1024 em EAX
@@ -91,9 +102,11 @@ disk_error:
     or $0x03, %eax
     mov %eax, 0x2000
 
-    // Habilita o setimo bit, Page Size, que diz que a entrada representa uma pagina de 2 MiB e nao eh para procurar abaixo da entrada                                  mov $0x00000083, %eax
+    // Habilita o setimo bit, Page Size, que diz que a entrada representa uma pagina de 2 MiB e nao eh para procurar abaixo da entrada
+    mov $0x00000083, %eax
     mov %eax, 0x3000
-                                                                                      // Poe o endereco da primeira tabela no registrador CR3 (registrador que a cpu ja le a fim de achar o endereco da estrutura de paginacao)
+
+    // Poe o endereco da primeira tabela no registrador CR3 (registrador que a cpu ja le a fim de achar o endereco da estrutura de paginacao)
     mov $0x1000, %eax
     mov %eax, %cr3
 
@@ -101,12 +114,16 @@ disk_error:
 
 
 
-    // Habilita o bit 5 do registrador CR4, habilitando o PAE (Physical Address Extension)                                                                              mov %cr4, %eax
+    // Habilita o bit 5 do registrador CR4, habilitando o PAE (Physical Address Extension)
+    mov %cr4, %eax
     or $0x20, %eax
-    mov %eax, %cr4                                                                
+    mov %eax, %cr4
+
     // Poe o endereco de um MSR (MSR sao registradores especiais, inacessiveis com MOV) no registrador ECX
     mov $0xC0000080, %ecx
-    rdmsr // RDMSR le o MSR do endereco presente em ECX e poe o valor lido no EAX     or $0x100, %eax // Habilita o bit 8, responsavel pelo LME (Long Mode Enable, ativa o modo 64 bits)                                                                  wrmsr // Escreve o valor de volta no MSR
+    rdmsr // RDMSR le o MSR do endereco presente em ECX e poe o valor lido no EAX
+    or $0x100, %eax // Habilita o bit 8, responsavel pelo LME (Long Mode Enable, ativa o modo 64 bits)
+    wrmsr // Escreve o valor de volta no MSR
 
     // Habilita Paging, habilitando o bit 31
     mov %cr0, %eax
@@ -122,26 +139,30 @@ long_mode:
     mov $0xB8000, %rax
 
     // Escreve um texto na memoria de textoVGA
-    movb $'P', 0(%rax)
+    movb $'e', 0(%rax)
     movb $0x07, 1(%rax)
-                                                                                      movb $'i', 2(%rax)
-    movb $0x07, 3(%rax)                                                           
-    movb $'l', 4(%rax)                                                                movb $0x07, 5(%rax)
+
+    movb $'u', 2(%rax)
+    movb $0x07, 3(%rax)
+
+    movb $'B', 4(%rax)
+    movb $0x07, 5(%rax)
 
     movb $'o', 6(%rax)
     movb $0x07, 7(%rax)
 
-    movb $'t', 8(%rax)
+    movb $'o', 8(%rax)
     movb $0x07, 9(%rax)
 
-    movb $'O', 10(%rax)
-    movb $0x07, 11(%rax)                                                          
-    movb $'S', 12(%rax)
-    movb $0x07, 13(%rax)                                                          
-    movb $' ', 14(%rax)
-    movb $0x07, 15(%rax)
-                                                                                      // Copiar kernel
-    mov $0x8000, %rsi // Origem, onde o kernel esta na RAM                            mov $0x100000, %rdi // Destino
+    movb $'t', 10(%rax)
+    movb $0x07, 11(%rax)
+
+    movb $' ', 12(%rax)
+    movb $0x07, 13(%rax)
+
+    // Copiar kernel
+    mov $0x8000, %rsi // Origem, onde o kernel esta na RAM
+    mov $0x100000, %rdi // Destino
     mov $KERNEL_SIZE, %rcx // Tamanho do kernel
     rep movsb
 
@@ -158,13 +179,18 @@ gdt_null:
 
 gdt_code32:
     .quad 0x00CF9A000000FFFF
-                                                                                  gdt_data:
-    .quad 0x00CF92000000FFFF                                                                                                                                        gdt_code64:
-    .quad 0x00AF9A000000FFFF                                                      
+
+gdt_data:
+    .quad 0x00CF92000000FFFF
+
+gdt_code64:
+    .quad 0x00AF9A000000FFFF
+
 gdt_end:
 
 // Diz ao GDTR o endereco e o limite da GDT
-gdt_descriptor:                                                                       .word gdt_end - gdt_start - 1
+gdt_descriptor:
+    .word gdt_end - gdt_start - 1
     .long gdt_start
 
 
