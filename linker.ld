@@ -1,4 +1,3 @@
-
 ENTRY(_start)
 
 SECTIONS
@@ -9,9 +8,13 @@ SECTIONS
     {
         *(.text)
         *(.text.*)
-    }                                                                             
-    .rodata : ALIGN(16)                                                               {
-        *(.rodata)                                                                        *(.rodata.*)                                                                  }
+    }
+
+    .rodata : ALIGN(16)
+    {
+        *(.rodata)
+        *(.rodata.*)
+    }
 
     .data : ALIGN(16)
     {
@@ -20,7 +23,9 @@ SECTIONS
     }
 
     .bss : ALIGN(16)
-    {                                                                                     *(COMMON)
+    {
+        *(COMMON)
         *(.bss)
-        *(.bss.*)                                                                     }
+        *(.bss.*)
+    }
 }
