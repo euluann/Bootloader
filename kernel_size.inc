@@ -1,1 +1,0 @@
-.equ KERNEL_SIZE, 302
