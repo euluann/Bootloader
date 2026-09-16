@@ -6,6 +6,7 @@ SECTIONS
 
     .text : ALIGN(16)
     {
+        KEEP(*(.text.boot))
         *(.text)
         *(.text.*)
     }
