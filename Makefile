@@ -8,8 +8,11 @@ KERNEL_ELF  = $(BUILD)/kernel.elf
 KERNEL_BIN  = $(BUILD)/kernel.bin
 KERNEL_SIZE = $(BUILD)/kernel_size.inc
 
-BOOTLOADER_OBJ = $(BUILD)/bootloader.o
-BOOTLOADER_BIN = $(BUILD)/bootloader.bin
+BOOTLOADER1_OBJ = $(BUILD)/bootloader1.o
+BOOTLOADER1_BIN = $(BUILD)/bootloader1.bin
+BOOTLOADER2_OBJ = $(BUILD)/bootloader2.o
+BOOTLOADER2_BIN = $(BUILD)/bootloader2.bin
+
 
 IMG = $(BUILD)/MyOS.img
 ISO = $(BUILD)/MyOS.iso
@@ -38,9 +41,9 @@ $(BUILD):
 # KERNEL
 # ============================================================
 
-$(BUILD)/boot.o: boot.S | $(BUILD)
+$(BUILD)/boot.o: boot.s | $(BUILD)
 	$(CC) --target=x86_64-unknown-none \
-		-c boot.S \
+		-c boot.s \
 		-o $@
 
 
@@ -65,7 +68,7 @@ $(KERNEL_BIN): $(KERNEL_ELF)
 
 # Gera o tamanho EXATO do kernel.bin
 $(KERNEL_SIZE): $(KERNEL_BIN)
-	@echo ".equ KERNEL_SIZE, $$(stat -c%s $(KERNEL_BIN))" > $@
+	@echo "#define KERNEL_SIZE $$(stat -c%s $(KERNEL_BIN))" > $@
 	@echo "Kernel: $$(stat -c%s $(KERNEL_BIN)) bytes"
 
 
@@ -73,28 +76,47 @@ $(KERNEL_SIZE): $(KERNEL_BIN)
 # BOOTLOADER
 # ============================================================
 
-$(BOOTLOADER_OBJ): bootloader.S $(KERNEL_SIZE) | $(BUILD)
+$(BOOTLOADER1_OBJ): bootloader1.s $(KERNEL_SIZE) | $(BUILD)
 	$(CC) --target=i386-unknown-none \
 		-m16 \
+		-x assembler-with-cpp \
 		-I$(BUILD) \
-		-c bootloader.S \
+		-c bootloader1.s \
 		-o $@
 
 
-$(BOOTLOADER_BIN): $(BOOTLOADER_OBJ)
+$(BOOTLOADER1_BIN): $(BOOTLOADER1_OBJ)
 	$(LD) -m elf_i386 \
 		--image-base 0x7C00 \
 		--oformat binary \
 		-Ttext 0x7C00 \
 		-o $@ \
-		$(BOOTLOADER_OBJ)
+		$(BOOTLOADER1_OBJ)
 
+
+$(BOOTLOADER2_OBJ): bootloader2.s $(KERNEL_SIZE) | $(BUILD)
+	$(CC) --target=i386-unknown-none \
+		-m16 \
+		-x assembler-with-cpp \
+		-I$(BUILD) \
+		-c bootloader2.s \
+		-o $@
+
+
+$(BOOTLOADER2_BIN): $(BOOTLOADER2_OBJ)
+	$(LD) -m elf_i386 \
+		--image-base 0x8000 \
+		--oformat binary \
+		-Ttext 0x8000 \
+		-o $@ \
+		$(BOOTLOADER2_OBJ)
+		
 
 # ============================================================
 # DISK IMAGE
 # ============================================================
 
-$(IMG): $(BOOTLOADER_BIN) $(KERNEL_BIN)
+$(IMG): $(BOOTLOADER1_BIN) $(BOOTLOADER2_BIN) $(KERNEL_BIN)
 	@echo "Criando imagem de disco..."
 
 	dd if=/dev/zero \
@@ -104,8 +126,13 @@ $(IMG): $(BOOTLOADER_BIN) $(KERNEL_BIN)
 
 	@echo "Gravando bootloader..."
 
-	dd if=$(BOOTLOADER_BIN) \
+	dd if=$(BOOTLOADER1_BIN) \
 		of=$(IMG) \
+		conv=notrunc
+	dd if=$(BOOTLOADER2_BIN) \
+		of=$(IMG) \
+		bs=512 \
+		seek=1 \
 		conv=notrunc
 
 	@echo "Gravando kernel..."
@@ -113,7 +140,7 @@ $(IMG): $(BOOTLOADER_BIN) $(KERNEL_BIN)
 	dd if=$(KERNEL_BIN) \
 		of=$(IMG) \
 		bs=512 \
-		seek=1 \
+		seek=2 \
 		conv=notrunc
 
 	@echo "Imagem criada: $(IMG)"
@@ -137,7 +164,9 @@ $(ISO): $(IMG)
 		-o $(ISO) \
 		-b MyOS.img \
 		-c boot.cat \
+		-no-emul-boot \
 		-boot-load-size 2880 \
+                -boot-info-table \
 		$(BUILD)/iso
 
 	rm -rf $(BUILD)/iso
@@ -148,7 +177,7 @@ $(ISO): $(IMG)
 	@echo "	$(ISO)"
 	@echo
 	@echo "Use:"
-	@echo "	qemu-system-x86_64 -cdrom compiled/MyOS.iso -display curses"
+	@echo "	qemu-system-x86_64 -drive file=compiled/MyOS.img -display curses -monitor none -serial none"
 	@echo "Ou:"
 	@echo "	make run"
 	@echo "=================================="
@@ -158,11 +187,8 @@ $(ISO): $(IMG)
 # RUN
 # ============================================================
 
-run: $(ISO)
-	qemu-system-x86_64 \
-		-cdrom $(ISO) \
-		-display curses
-
+run: $(IMG)
+	qemu-system-x86_64 -drive file=$(IMG) -display curses -monitor none -serial none
 
 # ============================================================
 # CLEAN
