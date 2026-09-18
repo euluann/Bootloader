@@ -16,7 +16,7 @@ The boot process is divided into two stages.
 - Automated QEMU testing with "make run"
 - Disk image and ISO generation
 
-Boot Process
+## Boot Process
 
 ### Stage 1
 
