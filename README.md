@@ -58,7 +58,9 @@ Build
 
 Build everything with:
 
+```bash
 make
+```
 
 This automatically compiles the kernel and both bootloader stages, creates the disk image, and generates the ISO.
 
@@ -66,24 +68,30 @@ Run
 
 Build and test the bootloader + kernel in QEMU:
 
+```bash
 make run
+```
 
 Clean
 
 Remove all generated files:
 
+```bash
 make clean
+```
 
 Output
 
 Build artifacts are generated in:
 
+```
 compiled/
 ├── MyOS.img
 ├── MyOS.iso
 ├── kernel.bin
 ├── bootloader1.bin
 └── bootloader2.bin
+```
 
 License
 
