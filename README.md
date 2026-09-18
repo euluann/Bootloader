@@ -1,10 +1,10 @@
-MyOS Bootloader
+# Bootloader
 
 A small experimental x86_64 bootloader written in Assembly, with a C kernel.
 
 The boot process is divided into two stages.
 
-Features
+## Features
 
 - Two-stage bootloader
 - Bootloader self-detection using a custom signature
@@ -18,7 +18,7 @@ Features
 
 Boot Process
 
-Stage 1
+### Stage 1
 
 The first stage runs in 16-bit Real Mode and is responsible for locating the bootloader on the disk.
 
@@ -26,7 +26,7 @@ It searches for the bootloader's custom signature, obtains its starting LBA, and
 
 It then transfers execution to Stage 2.
 
-Stage 2
+### Stage 2
 
 Stage 2 performs the CPU mode transition:
 
@@ -42,7 +42,7 @@ Long Mode
 
 After entering 64-bit mode, control is transferred to the C kernel.
 
-Requirements
+## Requirements
 
 - "make"
 - "clang"
@@ -54,7 +54,7 @@ Requirements
 
 A Linux environment is recommended.
 
-Build
+## Build
 
 Build everything with:
 
@@ -64,7 +64,7 @@ make
 
 This automatically compiles the kernel and both bootloader stages, creates the disk image, and generates the ISO.
 
-Run
+## Run
 
 Build and test the bootloader + kernel in QEMU:
 
@@ -72,7 +72,7 @@ Build and test the bootloader + kernel in QEMU:
 make run
 ```
 
-Clean
+## Clean
 
 Remove all generated files:
 
@@ -80,7 +80,7 @@ Remove all generated files:
 make clean
 ```
 
-Output
+## Output
 
 Build artifacts are generated in:
 
@@ -93,6 +93,6 @@ compiled/
 └── bootloader2.bin
 ```
 
-License
+## License
 
 MIT
