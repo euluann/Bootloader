@@ -192,28 +192,6 @@ read_error_msg:
 not_found_partition_error_msg:
     .asciz "Partition Not Found"
 
-    
-// Declarando cada GDT, com seus respectivos descritores de segmento, .quad manda o assembler reservar 8 bytes e por este valor
-//gdt_start:
-
-//gdt_null:
-//    .quad 0x0000000000000000
-
-//gdt_code32:
-//    .quad 0x00CF9A000000FFFF
-
-//gdt_data:
-//    .quad 0x00CF92000000FFFF
-
-//gdt_code64:
-//    .quad 0x00AF9A000000FFFF
-
-//gdt_end:
-
-// Diz ao GDTR o endereco e o limite da GDT
-//gdt_descriptor:
-//    .word gdt_end - gdt_start - 1
-//    .long gdt_start
 
 .org 504
 .ascii "euBOOT"
