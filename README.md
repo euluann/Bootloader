@@ -1,6 +1,6 @@
 # Bootloader
 
-A small experimental x86_64 bootloader written in Assembly, with a C kernel.
+A small experimental x86_64 bootloader (for bios) written in Assembly, with a C kernel, designed to boot from MBR-partitioned storage devices, including hard drives and USB drives.
 
 The boot process is divided into two stages.
 
@@ -14,7 +14,8 @@ The boot process is divided into two stages.
 - 64-bit kernel loading
 - Automated build with "make"
 - Automated QEMU testing with "make run"
-- Disk image and ISO generation
+- Disk image generation
+- File System in disk image
 
 ## Boot Process
 
@@ -48,8 +49,9 @@ After entering 64-bit mode, control is transferred to the C kernel.
 - "clang"
 - "ld.lld"
 - "llvm-objcopy"
-- "xorriso"
 - "qemu-system-x86_64"
+- "mkfs.fat"
+- "sfdisk"
 - Standard Unix utilities: "dd", "stat", "mkdir", "cp", "rm"
 
 A Linux environment is recommended.
@@ -87,7 +89,6 @@ Build artifacts are generated in:
 ```
 compiled/
 ├── MyOS.img
-├── MyOS.iso
 ├── kernel.bin
 ├── bootloader1.bin
 └── bootloader2.bin
