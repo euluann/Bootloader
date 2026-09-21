@@ -134,31 +134,30 @@ long_mode:
 
     // Entregar CPU ao kernel
     jmp 0x100000
-    movb $' ', 26(%rax)
-    movb $0x07, 27(%rax)
 
-    movb 0x1001A0, %bl
-    movb %bl, 28(%rax)
-    movb $0x07, 29(%rax)
-
-    movb 0x1001A1, %bl
-    movb %bl, 30(%rax)
-    movb $0x07, 31(%rax)
-
-    movb 0x1001A2, %bl
-    movb %bl, 32(%rax)
-    movb $0x07, 33(%rax)
-
-    movb 0x1001A3, %bl
-    movb %bl, 34(%rax)
-    movb $0x07, 35(%rax)
-
-    movb 0x1001A4, %bl
-    movb %bl, 36(%rax)
-    movb $0x07, 37(%rax)
-
-    jmp hang
-
+    // Para Debug, verifica se esta escrito 'Linha' onde estaria no kernel para saber se o kernel foi carregado corretamente
+//    movb $' ', 26(%rax)
+//    movb $0x07, 27(%rax)
+//
+//    movb 0x1001FF, %bl
+//    movb %bl, 28(%rax)
+//    movb $0x07, 29(%rax)
+//
+//    movb 0x100200, %bl
+//    movb %bl, 30(%rax)
+//    movb $0x07, 31(%rax)
+//
+//    movb 0x100201, %bl
+//    movb %bl, 32(%rax)
+//    movb $0x07, 33(%rax)
+//
+//    movb 0x100202, %bl
+//    movb %bl, 34(%rax)
+//    movb $0x07, 35(%rax)
+//
+//    movb 0x100203, %bl
+//    movb %bl, 36(%rax)
+//    movb $0x07, 37(%rax)
 
 
 hang:
