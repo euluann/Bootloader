@@ -56,17 +56,17 @@ _start:
     jc read_error
 
     // Verifica se todos os bytes da assinatura estao corretos
-    cmpb $'e', 0x81F8 // Compara bytes
+    cmpb $'e', 0x81B0 // Compara bytes
     jne .start_search // Se nao forem iguais, o bootloader pode estar gravado em alguma particao, entao pula para a procura da assinatura em todas as particoes
-    cmpb $'u', 0x81F9
+    cmpb $'u', 0x81B1
     jne .start_search
-    cmpb $'B', 0x81FA
+    cmpb $'B', 0x81B2
     jne .start_search
-    cmpb $'O', 0x81FB
+    cmpb $'O', 0x81B3
     jne .start_search
-    cmpb $'O', 0x81FC
+    cmpb $'O', 0x81B4
     jne .start_search
-    cmpb $'T', 0x81FD
+    cmpb $'T', 0x81B5
     jne .start_search
 
     jmp .continue // Se a assinatura estava correta, apenas continua o bootloader pulando a procura nas particoes
@@ -81,6 +81,7 @@ _start:
     incl %eax // Incrementa 1 no LBA inicial para ler o segundo setor da particao
     movl %eax, dap+8 // Move os bytes de EAX para dap apos os primeiros 8 bytes
     movl $0, dap+12 // Move 4 bytes zerados para dap apos os primeiros 12 bytes
+//    movw $(KERNEL_SIZE / 512 + 2), %ax
     movw $(KERNEL_SIZE / 512 + 2), %ax
     movw %ax, dap+2
     xorw %ax, %ax // Zera AX
@@ -117,17 +118,17 @@ find_partition:
     jc read_error
 
     // Verifica se todos os bytes da assinatura estao corretos
-    cmpb $'e', 0x81F8 // Compara bytes
+    cmpb $'e', 0x81B0 // Compara bytes
     jne .next // Se nao forem iguais pula para .next
-    cmpb $'u', 0x81F9
+    cmpb $'u', 0x81B1
     jne .next
-    cmpb $'B', 0x81FA
+    cmpb $'B', 0x81B2
     jne .next
-    cmpb $'O', 0x81FB
+    cmpb $'O', 0x81B3
     jne .next
-    cmpb $'O', 0x81FC
+    cmpb $'O', 0x81B4
     jne .next
-    cmpb $'T', 0x81FD
+    cmpb $'T', 0x81B5
     jne .next
 
     ret // Todos os bytes da assinatura estavam corretos, entao retorna para onde foi chamado com o LBA inicial da particao em EAX
@@ -192,10 +193,6 @@ read_error_msg:
 not_found_partition_error_msg:
     .asciz "Partition Not Found"
 
-
-.org 504
+// Escreve a assinatura do bootloader (para localizar seu LBA inicial) apartir do byte numero 432, assim nao ira corromper a tabela da MBR no mesmo setor apartir do byte numero 446
+.org 432
 .ascii "euBOOT"
-// Isto diz que apartir daqui tudo ficara apartir do offset 510 (se nao ha 510 bytes, os bytes faltantes para totalizar 510 serao criados zerados)
-.org 510
-// Escreve a assinatira 0xAA55 (2 bytes), totalizando 512 bytes
-.word 0xAA55
