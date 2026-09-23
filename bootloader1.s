@@ -94,7 +94,7 @@ _start:
     movb $'1', %al
     call print_char
 
-	jmp 0x8000 // Pula para o bootloader 2
+    jmp 0x8000 // Pula para o bootloader 2
 
 
 // Loop onde a cpu fica inativa
